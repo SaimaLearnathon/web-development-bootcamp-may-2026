@@ -16,7 +16,7 @@ function getMessageTime(date) {
 function MessageList({ messages, currentUser }) {
   if (messages.length === 0) {
     return (
-      <div className="flex h-full min-h-80 items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-slate-500">
+      <div className="flex h-full min-h-80 items-center justify-center rounded-md bg-white/75 text-sm text-[#64748b] shadow-sm">
         No messages yet.
       </div>
     );
@@ -36,7 +36,7 @@ function MessageList({ messages, currentUser }) {
             }`}
           >
             {!isMine && (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
+              <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#cbd5e1] text-xs font-semibold text-[#475569]">
                 {getInitial(message.user)}
               </div>
             )}
@@ -46,24 +46,31 @@ function MessageList({ messages, currentUser }) {
                 isMine ? 'items-end text-right' : 'items-start text-left'
               } flex flex-col`}
             >
-              <div className="mb-1 flex items-center gap-2 text-xs text-slate-500">
+              <div className="mb-1 flex items-center gap-2 px-1 text-[11px] text-[#64748b]">
                 <span className="font-medium">{message.user}</span>
                 {time && <span>{time}</span>}
               </div>
 
               <div
-                className={`rounded-lg px-4 py-2 text-sm leading-6 shadow-sm ${
+                className={`grid gap-2 px-3.5 py-2 text-sm leading-6 shadow-sm ${
                   isMine
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-800'
+                    ? 'rounded-2xl rounded-br-sm bg-[#d9fdd3] text-[#111827]'
+                    : 'rounded-2xl rounded-bl-sm bg-white text-[#111827]'
                 }`}
               >
-                {message.text}
+                {message.imageUrl && (
+                  <img
+                    alt="Chat upload"
+                    className="max-h-72 max-w-full rounded-lg object-contain"
+                    src={message.imageUrl}
+                  />
+                )}
+                {message.text && <span>{message.text}</span>}
               </div>
             </div>
 
             {isMine && (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
+              <div className="mb-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#2aabee] text-xs font-semibold text-white">
                 {getInitial(message.user)}
               </div>
             )}

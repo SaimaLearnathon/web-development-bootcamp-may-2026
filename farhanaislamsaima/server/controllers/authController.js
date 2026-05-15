@@ -1,5 +1,8 @@
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function makePassword(password) {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -76,7 +79,7 @@ async function loginUser(req, res) {
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
 
-    if (!user || !checkPassword(password, user.password)) {
+    if (!user || !user.password || !checkPassword(password, user.password)) {
       return res.status(400).json({ message: 'Wrong email or password' });
     }
 
@@ -90,7 +93,57 @@ async function loginUser(req, res) {
   }
 }
 
+async function googleLogin(req, res) {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ message: 'Google credential is required' });
+  }
+
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    return res.status(500).json({ message: 'Google login is not configured' });
+  }
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+    const email = payload.email?.toLowerCase();
+
+    if (!email || !payload.email_verified) {
+      return res.status(400).json({ message: 'Google email is not verified' });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        name: payload.name || email.split('@')[0],
+        email,
+        authProvider: 'google',
+        googleId: payload.sub
+      });
+      await user.save();
+    } else {
+      user.authProvider = user.authProvider || 'google';
+      user.googleId = user.googleId || payload.sub;
+      await user.save();
+    }
+
+    res.json({
+      message: 'Logged in with Google',
+      user: cleanUser(user)
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: 'Google login failed' });
+  }
+}
+
 module.exports = {
+  googleLogin,
   registerUser,
   loginUser
 };
