@@ -14,16 +14,27 @@ const { clearMessageCache } = require('./controllers/messageController');
 const app = express();
 const server = http.createServer(app);
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+const CLIENT_URLS = CLIENT_URL
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || CLIENT_URLS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  }
+};
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: CLIENT_URLS,
     methods: ['GET', 'POST'],
   }
 });
 
-app.use(cors({
-  origin: CLIENT_URL
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
 const apiLimiter = rateLimit({
