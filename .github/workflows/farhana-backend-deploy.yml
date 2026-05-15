@@ -6,10 +6,10 @@ on:
       - main
       - master
     paths:
-      - 'chatapp/server/**'
-      - 'chatapp/package.json'
-      - 'chatapp/package-lock.json'
-      - 'chatapp/.dockerignore'
+      - 'farhanaislamsaima/server/**'
+      - 'farhanaislamsaima/package.json'
+      - 'farhanaislamsaima/package-lock.json'
+      - 'farhanaislamsaima/.dockerignore'
       - '.github/workflows/farhana-backend-deploy.yml'
   workflow_dispatch:
 
@@ -35,8 +35,8 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
-          context: ./chatapp
-          file: ./chatapp/server/Dockerfile
+          context: ./farhanaislamsaima
+          file: ./farhanaislamsaima/server/Dockerfile
           push: true
           tags: |
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest

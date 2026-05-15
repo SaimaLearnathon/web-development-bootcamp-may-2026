@@ -1,11 +1,11 @@
 .env
 *.env
 node_modules
-chatapp/node_modules
-chatapp/client/node_modules
-chatapp/server/node_modules
+farhanaislamsaima/.git-child-backup/
+farhanaislamsaima/node_modules
+farhanaislamsaima/client/node_modules
+farhanaislamsaima/server/node_modules
 dist
-chatapp/dist
-chatapp/client/dist
+farhanaislamsaima/dist
+farhanaislamsaima/client/dist
 npm-debug.log
-.git-child-backup/
