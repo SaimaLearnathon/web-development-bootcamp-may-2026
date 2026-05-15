@@ -4,7 +4,7 @@
 
 # EchoLine
 
-> A MERN real-time chat application for private conversations, group messaging, and live collaboration.
+> A real-time chat application for private conversations, group messaging, and live collaboration.
 
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=111)
 ![Vite](https://img.shields.io/badge/Build-Vite-646CFF?logo=vite&logoColor=white)
