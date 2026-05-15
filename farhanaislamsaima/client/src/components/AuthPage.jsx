@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { BrandLogo } from './BrandLogo';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -87,11 +88,11 @@ function AuthPage({ mode, message, onGoogleSubmit, onModeChange, onSubmit }) {
     <main className="min-h-screen bg-[#dfe7ef] px-4 py-8 text-[#111827]">
       <div className="mx-auto grid min-h-[calc(100vh-64px)] max-w-5xl items-center gap-10 lg:grid-cols-[1fr_420px]">
         <section className="hidden lg:block">
-          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#2aabee] text-lg font-semibold text-white">
-            C
+          <div className="mb-10">
+            <BrandLogo />
           </div>
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#64748b]">
-            Chat application
+            Messaging platform
           </p>
           <h1 className="max-w-xl text-5xl font-semibold leading-tight text-[#111827]">
             Message privately, organize groups, and keep conversations moving.
@@ -105,6 +106,9 @@ function AuthPage({ mode, message, onGoogleSubmit, onModeChange, onSubmit }) {
         <section className="w-full rounded-lg border border-[#ccd6e0] bg-white shadow-sm">
           <div className="p-6 sm:p-8">
             <div>
+              <div className="mb-6 lg:hidden">
+                <BrandLogo />
+              </div>
               <p className="mb-1 text-sm font-medium text-[#64748b]">Welcome back</p>
               <h2 className="text-2xl font-semibold leading-tight text-[#111827]">
                 {isLogin ? 'Login' : 'Create account'}

@@ -1,4 +1,10 @@
-# MERN Real-Time Chat Application
+<p align="center">
+  <img src="./farhanaislamsaima/client/public/echoline-logo.svg" width="96" alt="EchoLine logo" />
+</p>
+
+# EchoLine
+
+> A MERN real-time chat application for private conversations, group messaging, and live collaboration.
 
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=111)
 ![Vite](https://img.shields.io/badge/Build-Vite-646CFF?logo=vite&logoColor=white)
@@ -9,7 +15,7 @@
 ![Azure](https://img.shields.io/badge/Backend-Azure_Container_Apps-0078D4?logo=microsoftazure&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?logo=vercel&logoColor=white)
 
-A full-stack real-time chat application built with the MERN stack. The app supports email/password login, Google authentication, direct messaging, group conversations, image messages, emojis, typing indicators, send sounds, search, Docker-based local development, backend CI/CD, Azure deployment, Vercel frontend hosting, caching, and rate limiting.
+EchoLine is a full-stack real-time chat application built with the MERN stack. The app supports email/password login, Google authentication, direct messaging, group conversations, image messages, emojis, typing indicators, send sounds, search, Docker-based local development, backend CI/CD, Azure deployment, Vercel frontend hosting, caching, and rate limiting.
 
 ## Table Of Contents
 
@@ -35,7 +41,7 @@ A full-stack real-time chat application built with the MERN stack. The app suppo
 
 ## Project Summary
 
-This project is a production-style MERN chat application designed for real-time communication between authenticated users.
+EchoLine is a production-style MERN chat application designed for real-time communication between authenticated users.
 
 The frontend is a Vite React application styled with Tailwind CSS and DaisyUI. The backend is an Express API with Socket.IO for live messaging. MongoDB stores users, conversations, and messages. The backend can be deployed as a Docker image to Azure Container Apps, while the frontend can be deployed to Vercel.
 
