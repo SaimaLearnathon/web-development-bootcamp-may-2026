@@ -1,0 +1,11 @@
+.env
+*.env
+node_modules
+chatapp/node_modules
+chatapp/client/node_modules
+chatapp/server/node_modules
+dist
+chatapp/dist
+chatapp/client/dist
+npm-debug.log
+.git-child-backup/
