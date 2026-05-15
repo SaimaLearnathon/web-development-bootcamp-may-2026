@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./farhanaislamsaima/client/public/echoline-logo.svg" width="96" alt="EchoLine logo" />
+  <img src="./client/public/echoline-logo.svg" width="96" alt="EchoLine logo" />
 </p>
 
 # EchoLine
