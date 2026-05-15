@@ -1,0 +1,41 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: chat-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: chat-server
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      MONGO_URI: mongodb://mongo:27017/chatdb
+      CLIENT_URL: http://localhost:5173
+    depends_on:
+      - mongo
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: chat-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://server:4000
+      VITE_SOCKET_URL: http://localhost:4000
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:

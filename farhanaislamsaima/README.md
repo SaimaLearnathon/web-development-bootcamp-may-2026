@@ -1,29 +1,57 @@
-# MERN Live Chat App
+# Chat App
 
-A minimal starter template for a MERN live chat application.
+This is a simple MERN chat app. It uses React for the frontend, Express and Socket.IO for the backend, and MongoDB for users and messages.
 
-## Structure
+## Folders
 
-- `server/` — Express, Socket.IO, MongoDB backend
-- `client/` — React + Vite frontend
+- `client` - React app with Tailwind CSS and DaisyUI
+- `server` - Express API and socket server
 
-## Setup
+## Run the project
 
-1. Install dependencies:
-   - Open terminal at project root
-   - Run `npm install`
+Install dependencies first:
 
-2. Start the app in development mode:
-   - Run `npm run dev`
+```bash
+npm install
+```
 
-3. Open the frontend:
-   - Visit `http://localhost:5173`
+Then start the app:
 
-4. MongoDB:
-   - Make sure MongoDB is running locally on `mongodb://127.0.0.1:27017`
+```bash
+npm run dev
+```
 
-## Features
+Frontend: `http://localhost:5173`
+Backend: `http://localhost:4000`
 
-- Persistent chat history with MongoDB
-- Live updates using Socket.IO
-- Simple React chat UI
+MongoDB should be running locally at:
+
+```text
+mongodb://127.0.0.1:27017/chatdb
+```
+
+## Run with Docker
+
+Start MongoDB, the backend, and the frontend:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+Stop the containers:
+
+```bash
+docker compose down
+```
+
+## API
+
+- `POST /api/auth/register` - create a user
+- `POST /api/auth/login` - login with email and password
+- `GET /api/messages` - get old messages

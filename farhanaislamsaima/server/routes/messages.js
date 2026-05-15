@@ -1,22 +1,12 @@
 const express = require('express');
-const Message = require('../models/Message');
+const {
+  createMessage,
+  getMessages
+} = require('../controllers/messageController');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: 1 }).limit(100);
-  res.json(messages);
-});
-
-router.post('/', async (req, res) => {
-  const { user, text } = req.body;
-  if (!user || !text) {
-    return res.status(400).json({ error: 'User and text are required' });
-  }
-
-  const message = new Message({ user, text });
-  await message.save();
-  res.status(201).json(message);
-});
+router.get('/', getMessages);
+router.post('/', createMessage);
 
 module.exports = router;

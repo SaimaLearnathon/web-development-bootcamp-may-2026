@@ -4,37 +4,47 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const messageRoutes = require('./routes/messages');
-const Message = require('./models/Message');
+const authRoutes = require('./routes/auth');
+const chatRoutes = require('./routes/messages');
+const ChatMessage = require('./models/Message');
 
 const app = express();
 const server = http.createServer(app);
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST']
+    origin: CLIENT_URL,
+    methods: ['GET', 'POST'],
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: CLIENT_URL
+}));
 app.use(express.json());
-app.use('/api/messages', messageRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/messages', chatRoutes);
 
 app.get('/', (req, res) => {
-  res.send({ status: 'Chat server is running' });
+  res.send('Chat server is running');
 });
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('user connected:', socket.id);
 
   socket.on('sendMessage', async (payload) => {
-    const message = new Message(payload);
-    await message.save();
-    io.emit('receiveMessage', message);
+    try {
+      const message = new ChatMessage(payload);
+      await message.save();
+      io.emit('receiveMessage', message);
+      console.log('message:', payload.text);
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('user disconnected:', socket.id);
   });
 });
 
@@ -45,7 +55,7 @@ mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     server.listen(PORT, () => {
-      console.log(`Server listening on http://localhost:${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
