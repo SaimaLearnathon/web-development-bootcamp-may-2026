@@ -3,14 +3,19 @@ import { io } from 'socket.io-client';
 import apiClient from './api/apiClient';
 import AuthPage from './components/AuthPage';
 import ChatPage from './components/ChatPage';
+import { registerNotifications } from './utils/notifications';
 import {
+  getSavedToken,
   getSavedUser,
   removeUser,
+  saveToken,
   saveUser
 } from './utils/storage';
 
 const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000';
-const socket = io(socketUrl);
+const socket = io(socketUrl, {
+  autoConnect: false
+});
 
 function playSendSound() {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -34,7 +39,9 @@ function playSendSound() {
 }
 
 function App() {
-  const [user, setUser] = useState(getSavedUser);
+  const [user, setUser] = useState(() => (
+    getSavedToken() ? getSavedUser() : null
+  ));
   const [mode, setMode] = useState('login');
   const [authMessage, setAuthMessage] = useState('');
   const [conversations, setConversations] = useState([]);
@@ -46,9 +53,23 @@ function App() {
 
   useEffect(() => {
     if (!user) {
+      socket.disconnect();
       return;
     }
 
+    const token = getSavedToken();
+
+    if (!token) {
+      removeUser();
+      setUser(null);
+      return;
+    }
+
+    socket.auth = { token };
+    socket.connect();
+    registerNotifications().catch((error) => {
+      console.log('Notification registration failed:', error);
+    });
     setStatus(socket.connected ? 'Connected' : 'Connecting...');
 
     async function loadChatData() {
@@ -103,6 +124,7 @@ function App() {
       socket.off('typing');
       socket.off('stopTyping');
       socket.off('disconnect');
+      socket.disconnect();
     };
   }, [user]);
 
@@ -141,6 +163,7 @@ function App() {
     try {
       const res = await apiClient.post(url, formData);
 
+      saveToken(res.data.token);
       saveUser(res.data.user);
       setUser(res.data.user);
     } catch (err) {
@@ -155,6 +178,7 @@ function App() {
     try {
       const res = await apiClient.post('/auth/google', { credential });
 
+      saveToken(res.data.token);
       saveUser(res.data.user);
       setUser(res.data.user);
     } catch (err) {
@@ -170,6 +194,7 @@ function App() {
 
   function logout() {
     removeUser();
+    socket.disconnect();
     setUser(null);
     setConversations([]);
     setMessages([]);

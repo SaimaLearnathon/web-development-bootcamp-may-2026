@@ -1,10 +1,10 @@
-const express = require('express');
-const {
+import express from 'express';
+import {
   createConversation,
   getConversations,
   getUsers,
   leaveConversation
-} = require('../controllers/conversationController');
+} from './conversations.controller.js';
 
 const router = express.Router();
 
@@ -13,4 +13,4 @@ router.post('/', createConversation);
 router.get('/users', getUsers);
 router.patch('/:id/leave', leaveConversation);
 
-module.exports = router;
+export default router;

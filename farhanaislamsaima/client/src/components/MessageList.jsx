@@ -30,7 +30,7 @@ function MessageList({ messages, currentUser }) {
 
         return (
           <div
-            key={message._id || message.createdAt}
+            key={message.id || message._id || message.createdAt}
             className={`flex items-end gap-2 ${
               isMine ? 'justify-end' : 'justify-start'
             }`}

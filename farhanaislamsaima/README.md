@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./farhanaislamsaima/client/public/echoline-logo.svg" width="96" alt="EchoLine logo" />
+  <img src="./client/public/echoline-logo.svg" width="96" alt="EchoLine logo" />
 </p>
 
 # EchoLine
@@ -9,13 +9,14 @@
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=111)
 ![Vite](https://img.shields.io/badge/Build-Vite-646CFF?logo=vite&logoColor=white)
 ![Express](https://img.shields.io/badge/API-Express-111827?logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/ORM-Prisma-2D3748?logo=prisma&logoColor=white)
 ![Socket.IO](https://img.shields.io/badge/Realtime-Socket.IO-010101?logo=socketdotio&logoColor=white)
 ![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)
 ![Azure](https://img.shields.io/badge/Backend-Azure_Container_Apps-0078D4?logo=microsoftazure&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?logo=vercel&logoColor=white)
 
-EchoLine is a full-stack real-time chat application built with the MERN stack. The app supports email/password login, Google authentication, direct messaging, group conversations, image messages, emojis, typing indicators, send sounds, search, Docker-based local development, backend CI/CD, Azure deployment, Vercel frontend hosting, caching, and rate limiting.
+EchoLine is a full-stack real-time chat application built with React, Express, Node.js, PostgreSQL, and Prisma. The app supports email/password login, Google authentication, direct messaging, group conversations, image messages, emojis, typing indicators, send sounds, search, Docker-based local development, backend CI/CD, Azure deployment, Vercel frontend hosting, Prisma ORM, caching, and rate limiting.
 
 ## Table Of Contents
 
@@ -43,14 +44,14 @@ EchoLine is a full-stack real-time chat application built with the MERN stack. T
 
 EchoLine is a production-style MERN chat application designed for real-time communication between authenticated users.
 
-The frontend is a Vite React application styled with Tailwind CSS and DaisyUI. The backend is an Express API with Socket.IO for live messaging. MongoDB stores users, conversations, and messages. The backend can be deployed as a Docker image to Azure Container Apps, while the frontend can be deployed to Vercel.
+The frontend is a Vite React application styled with Tailwind CSS and DaisyUI. The backend is an Express API with Socket.IO for live messaging. PostgreSQL stores users, conversations, memberships, and messages through Prisma ORM. The backend can be deployed as a Docker image to Azure Container Apps, while the frontend can be deployed to Vercel.
 
 ## Live Architecture
 
 ```text
 Frontend: Vercel / Vite React
 Backend: Azure Container Apps / Docker Hub image
-Database: MongoDB Atlas
+Database: PostgreSQL
 Realtime: Socket.IO
 CI/CD: GitHub Actions -> Docker Hub -> Azure Container Apps
 ```
@@ -81,7 +82,7 @@ CI/CD: GitHub Actions -> Docker Hub -> Azure Container Apps
 - Send sound after sending a message
 - Emoji quick actions
 - Image message support with preview before sending
-- Message history loaded from MongoDB
+- Message history loaded from PostgreSQL
 
 ### UI Features
 
@@ -115,8 +116,8 @@ CI/CD: GitHub Actions -> Docker Hub -> Azure Container Apps
 | Realtime Client | Socket.IO Client |
 | Backend | Node.js, Express |
 | Realtime Server | Socket.IO |
-| Database | MongoDB |
-| ODM | Mongoose |
+| Database | PostgreSQL |
+| ORM | Prisma |
 | Authentication | Custom email/password auth, Google Identity Services |
 | Rate Limiting | express-rate-limit |
 | Caching | In-memory TTL cache |
@@ -142,10 +143,18 @@ farhanaislamsaima/
     vite.config.js
 
   server/
-    controllers/
-    models/
-    routes/
-    utils/
+    prisma/
+    src/
+      app.js
+      modules/
+        auth/
+        conversations/
+        messages/
+        realtime/
+        users/
+      shared/
+        cache.js
+        db.js
     Dockerfile
     package.json
     server.js
@@ -165,7 +174,7 @@ flowchart LR
   User[User Browser] --> Vercel[Vercel Frontend]
   Vercel -->|REST API| Azure[Azure Container Apps Backend]
   Vercel <-->|Socket.IO| Azure
-  Azure --> Mongo[(MongoDB Atlas)]
+  Azure --> Postgres[(PostgreSQL)]
   Azure --> Cache[In-Memory Cache]
   GitHub[GitHub Actions] --> DockerHub[Docker Hub]
   DockerHub --> Azure
@@ -179,7 +188,7 @@ sequenceDiagram
   participant C as React Client
   participant G as Google Identity Services
   participant A as Express API
-  participant M as MongoDB
+  participant M as PostgreSQL
 
   U->>C: Click Google Login
   C->>G: Request Google credential
@@ -198,7 +207,7 @@ sequenceDiagram
 sequenceDiagram
   participant A as Sender Client
   participant S as Socket.IO Server
-  participant D as MongoDB
+  participant D as PostgreSQL
   participant B as Receiver Client
 
   A->>S: joinConversation(conversationId)
@@ -219,7 +228,7 @@ erDiagram
   USER ||--o{ MESSAGE : sends
 
   USER {
-    ObjectId _id
+    string id
     string name
     string email
     string password
@@ -228,18 +237,23 @@ erDiagram
   }
 
   CONVERSATION {
-    ObjectId _id
+    string id
     string name
     string type
-    ObjectId[] participants
-    ObjectId createdBy
+    string createdById
+  }
+
+  CONVERSATION_MEMBER {
+    string id
+    string conversationId
+    string userId
   }
 
   MESSAGE {
-    ObjectId _id
+    string id
     string user
-    ObjectId senderId
-    ObjectId conversationId
+    string senderId
+    string conversationId
     string text
     string imageUrl
     Date createdAt
@@ -270,7 +284,16 @@ farhanaislamsaima/server/.env
 Example:
 
 ```env
-MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database-name>
+DATABASE_URL=postgresql://chatuser:chatpassword@localhost:5433/chatdb
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=replace-this-with-a-long-random-secret
+CLOUDINARY_CLOUD_NAME=<your-cloud-name>
+CLOUDINARY_API_KEY=<your-api-key>
+CLOUDINARY_API_SECRET=<your-api-secret>
+CLOUDINARY_UPLOAD_FOLDER=echoline/chat-images
+FIREBASE_PROJECT_ID=<your-firebase-project-id>
+FIREBASE_CLIENT_EMAIL=<firebase-admin-client-email>
+FIREBASE_PRIVATE_KEY="<firebase-admin-private-key>"
 PORT=4000
 CLIENT_URL=http://localhost:5173
 GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
@@ -279,7 +302,16 @@ GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
 For Azure Container Apps, configure these as container app environment variables:
 
 ```text
-MONGO_URI
+DATABASE_URL
+REDIS_URL
+JWT_SECRET
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+CLOUDINARY_UPLOAD_FOLDER
+FIREBASE_PROJECT_ID
+FIREBASE_CLIENT_EMAIL
+FIREBASE_PRIVATE_KEY
 PORT
 CLIENT_URL
 GOOGLE_CLIENT_ID
@@ -299,6 +331,13 @@ Example:
 VITE_API_URL=http://localhost:4000/api
 VITE_SOCKET_URL=http://localhost:4000
 VITE_GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
+VITE_FIREBASE_API_KEY=<your-firebase-web-api-key>
+VITE_FIREBASE_AUTH_DOMAIN=<your-project-id>.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=<your-project-id>
+VITE_FIREBASE_STORAGE_BUCKET=<your-project-id>.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
+VITE_FIREBASE_APP_ID=<your-firebase-web-app-id>
+VITE_FIREBASE_VAPID_KEY=<your-fcm-web-push-vapid-key>
 ```
 
 For Vercel, configure:
@@ -307,6 +346,13 @@ For Vercel, configure:
 VITE_API_URL=https://<your-azure-backend-url>/api
 VITE_SOCKET_URL=https://<your-azure-backend-url>
 VITE_GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
+VITE_FIREBASE_API_KEY=<your-firebase-web-api-key>
+VITE_FIREBASE_AUTH_DOMAIN=<your-project-id>.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=<your-project-id>
+VITE_FIREBASE_STORAGE_BUCKET=<your-project-id>.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
+VITE_FIREBASE_APP_ID=<your-firebase-web-app-id>
+VITE_FIREBASE_VAPID_KEY=<your-fcm-web-push-vapid-key>
 ```
 
 ## Run Locally
@@ -364,7 +410,8 @@ Docker Compose starts:
 
 | Service | Port | Purpose |
 | --- | --- | --- |
-| `mongo` | `27017` | Local MongoDB |
+| `postgres` | `5433` | Local PostgreSQL on the host, mapped to `5432` inside Docker |
+| `redis` | `6379` | Local Redis cache |
 | `server` | `4000` | Express API and Socket.IO server |
 | `client` | `5173` | Vite React frontend |
 
@@ -461,7 +508,7 @@ Example message body:
   "senderId": "user-id",
   "user": "Farhana Islam",
   "text": "Hello",
-  "imageUrl": "data:image/png;base64,..."
+  "imageUrl": "https://res.cloudinary.com/<cloud-name>/image/upload/..."
 }
 ```
 
@@ -478,6 +525,12 @@ Example message body:
 | `disconnect` | Socket.IO lifecycle | User socket disconnected |
 
 ## Database Models
+
+The backend uses Prisma ORM with PostgreSQL. The schema lives in:
+
+```text
+farhanaislamsaima/server/prisma/schema.prisma
+```
 
 ### User
 
@@ -599,7 +652,7 @@ az containerapp up \
 Required Azure environment variables:
 
 ```text
-MONGO_URI
+DATABASE_URL
 PORT
 CLIENT_URL
 GOOGLE_CLIENT_ID
@@ -665,9 +718,9 @@ Azure Container Apps -> GOOGLE_CLIENT_ID
 - Rotate secrets if they are exposed.
 - Use Docker Hub access tokens instead of account passwords.
 - Use Azure environment variables or secrets for production configuration.
-- MongoDB Atlas should restrict network access in production.
+- PostgreSQL should restrict network access in production.
 - The current app uses simple local storage for user state, which is suitable for demo use but not a full production session system.
-- Image messages are stored as data URLs and limited to small files. Production systems should use object storage such as Cloudinary or Azure Blob Storage.
+- Image messages are uploaded to Cloudinary and messages store the returned image URL.
 
 ## Known Limitations
 
@@ -675,7 +728,7 @@ Azure Container Apps -> GOOGLE_CLIENT_ID
 - Rate limiting is per container instance.
 - Socket.IO is not configured for multiple backend replicas.
 - Local storage auth is not equivalent to secure JWT/session auth.
-- Image upload is demo-friendly but not production-grade storage.
+- Cloudinary image upload needs valid Cloudinary environment variables.
 
 ## Future Improvements
 
@@ -686,7 +739,7 @@ Azure Container Apps -> GOOGLE_CLIENT_ID
 - Message reactions
 - Message delete/edit
 - User profile photos
-- Cloudinary or Azure Blob Storage for images
+- Image moderation and cleanup for Cloudinary uploads
 - Admin controls for groups
 - Unit and integration tests
 - End-to-end tests with Playwright

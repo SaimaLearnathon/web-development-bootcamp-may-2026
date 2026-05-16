@@ -1,4 +1,5 @@
 const USER_KEY = 'chatUser';
+const TOKEN_KEY = 'chatToken';
 
 export function getSavedUser() {
   const savedUser = localStorage.getItem(USER_KEY);
@@ -19,6 +20,15 @@ export function saveUser(user) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
+export function getSavedToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function saveToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
 export function removeUser() {
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }

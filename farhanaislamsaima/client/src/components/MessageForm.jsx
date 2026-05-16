@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import apiClient from '../api/apiClient';
 
 function ImageIcon() {
   return (
@@ -30,25 +31,16 @@ const emojis = [
   '\u{1F44D}'
 ];
 
-function readImage(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 function MessageForm({ disabled, onSend, onTyping, onStopTyping }) {
   const [imagePreview, setImagePreview] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const [text, setText] = useState('');
   const [typingTimer, setTypingTimer] = useState(null);
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (text.trim() === '' && !imagePreview) {
+    if (isUploading || (text.trim() === '' && !imagePreview)) {
       return;
     }
 
@@ -83,14 +75,29 @@ function MessageForm({ disabled, onSend, onTyping, onStopTyping }) {
       return;
     }
 
-    if (file.size > 750 * 1024) {
-      alert('Please choose an image smaller than 750KB.');
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Please choose an image smaller than 2MB.');
       return;
     }
 
-    const imageUrl = await readImage(file);
-    setImagePreview(imageUrl);
-    e.target.value = '';
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      setIsUploading(true);
+      const res = await apiClient.post('/uploads/image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setImagePreview(res.data.imageUrl);
+      e.target.value = '';
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || 'Could not upload image.');
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   function addEmoji(emoji) {
@@ -140,7 +147,7 @@ function MessageForm({ disabled, onSend, onTyping, onStopTyping }) {
           <input
             accept="image/*"
             className="hidden"
-            disabled={disabled}
+            disabled={disabled || isUploading}
             type="file"
             onChange={handleImageChange}
           />
@@ -153,9 +160,9 @@ function MessageForm({ disabled, onSend, onTyping, onStopTyping }) {
           onChange={handleTextChange}
           placeholder="Write a message"
         />
-        <button className="btn h-11 min-h-11 rounded-full border-[#2aabee] bg-[#2aabee] px-5 text-white hover:bg-[#229bd8]" disabled={disabled} title="Send message" type="submit">
+        <button className="btn h-11 min-h-11 rounded-full border-[#2aabee] bg-[#2aabee] px-5 text-white hover:bg-[#229bd8]" disabled={disabled || isUploading} title="Send message" type="submit">
           <SendIcon />
-          <span className="hidden sm:inline">Send</span>
+          <span className="hidden sm:inline">{isUploading ? 'Uploading' : 'Send'}</span>
         </button>
       </div>
     </form>

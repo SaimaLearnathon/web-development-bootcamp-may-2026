@@ -1,9 +1,12 @@
-const Message = require('../models/Message');
-const {
+import {
   clearCache,
   getCache,
   setCache
-} = require('../utils/cache');
+} from '../../shared/cache.js';
+import {
+  createMessage as createMessageService,
+  listMessages
+} from './messages.service.js';
 
 async function getMessages(req, res) {
   const { conversationId } = req.query;
@@ -13,18 +16,16 @@ async function getMessages(req, res) {
   }
 
   const cacheKey = `messages:${conversationId}`;
-  const cachedMessages = getCache(cacheKey);
+  const cachedMessages = await getCache(cacheKey);
 
   if (cachedMessages) {
     return res.json(cachedMessages);
   }
 
   try {
-    const messages = await Message.find({ conversationId })
-      .sort({ createdAt: 1 })
-      .limit(100);
+    const messages = await listMessages(conversationId);
 
-    setCache(cacheKey, messages, 15000);
+    await setCache(cacheKey, messages, 15000);
     res.json(messages);
   } catch (error) {
     console.log(error);
@@ -33,7 +34,9 @@ async function getMessages(req, res) {
 }
 
 async function createMessage(req, res) {
-  const { conversationId, senderId, user, text, imageUrl } = req.body;
+  const { conversationId, text, imageUrl } = req.body;
+  const senderId = req.user.id;
+  const user = req.user.name;
 
   if (!conversationId || !user || (!text && !imageUrl)) {
     return res.status(400).json({
@@ -42,9 +45,15 @@ async function createMessage(req, res) {
   }
 
   try {
-    const message = new Message({ conversationId, senderId, user, text, imageUrl });
-    await message.save();
-    clearCache(`messages:${conversationId}`);
+    const message = await createMessageService({
+      conversationId,
+      senderId,
+      user,
+      text,
+      imageUrl
+    });
+
+    await clearMessageCache(conversationId);
     res.status(201).json(message);
   } catch (error) {
     console.log(error);
@@ -52,12 +61,12 @@ async function createMessage(req, res) {
   }
 }
 
-function clearMessageCache(conversationId) {
-  clearCache(`messages:${conversationId}`);
+async function clearMessageCache(conversationId) {
+  await clearCache(`messages:${conversationId}`);
 }
 
-module.exports = {
+export {
   clearMessageCache,
-  getMessages,
-  createMessage
+  createMessage,
+  getMessages
 };
