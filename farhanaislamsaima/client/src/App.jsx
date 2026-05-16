@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import apiClient from './api/apiClient';
 import AuthPage from './components/AuthPage';
@@ -172,7 +172,7 @@ function App() {
     }
   }
 
-  async function handleGoogleAuth(credential) {
+  const handleGoogleAuth = useCallback(async (credential) => {
     setAuthMessage('');
 
     try {
@@ -185,7 +185,7 @@ function App() {
       const message = err.response?.data?.message || 'Google login failed';
       setAuthMessage(message);
     }
-  }
+  }, []);
 
   function changeMode(nextMode) {
     setMode(nextMode);
