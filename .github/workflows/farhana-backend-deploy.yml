@@ -17,7 +17,7 @@ env:
   DOCKERHUB_USERNAME: farhanasaima2110047
   IMAGE_NAME: chatapp-server
   RESOURCE_GROUP: chatapp-rg
-  CONTAINER_APP_NAME: chatapp-server
+  CONTAINER_APP_NAME: chat-server
 
 jobs:
   build-and-deploy:
