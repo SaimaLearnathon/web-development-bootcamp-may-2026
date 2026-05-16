@@ -565,6 +565,42 @@ npm run dev --workspace client
 
 ---
 
+## 🧪 Backend Testing
+
+The backend includes a lightweight test setup using Node.js built-in test runner, so no extra testing framework is required.
+
+Current tests cover:
+
+- JWT token signing and verification
+- Invalid JWT rejection
+- Auth middleware behavior for missing, valid, and invalid tokens
+- Express health check route
+- CORS preflight behavior for allowed frontend origins
+
+Run backend tests from the project folder:
+
+```powershell
+cd E:\chatapp-bootcamp\web-development-bootcamp-may-2026\farhanaislamsaima
+npm test --workspace server
+```
+
+If Windows/npm shows a local permission error, run the test files directly:
+
+```powershell
+cd E:\chatapp-bootcamp\web-development-bootcamp-may-2026\farhanaislamsaima\server
+node --test .\test\app.test.js .\test\auth.middleware.test.js .\test\jwt.test.js
+```
+
+Expected successful result:
+
+```text
+# tests 7
+# pass 7
+# fail 0
+```
+
+---
+
 ## 🌍 Deployment
 
 ### Frontend On Vercel
